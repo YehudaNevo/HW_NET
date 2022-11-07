@@ -9,15 +9,23 @@
 """
 
 LENGTH_FIELD_SIZE = 2
-PORT = 8820
+PORT = 8821
+def check_cmd(data):
+    return data in ["TIME", "WHORU", "RAND", "EXIT"]
 
 
 def create_msg(data):
-    """Create a valid protocol message, with length field"""
-    return "05HELLO"
+    size = str(len(data)).zfill(2)
+    return size + data
 
 
 def get_msg(my_socket):
-    """Extract message from protocol, without the length field
-       If length field does not include a number, returns False, "Error" """
-    return True, "HELLO"
+    size = my_socket.recv(2).decode()
+    if size.isnumeric():
+        data = my_socket.recv(int(size)).decode()
+        if check_cmd(data):
+            return True, data
+        return False, "Please follow the protocol cmd "
+    return False, "ERR didnt get in the correct format"
+
+

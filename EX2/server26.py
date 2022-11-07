@@ -1,55 +1,63 @@
 """EX 2.6 server implementation
-   Author:
-   Date:
+   Author: Yehuda Nevo
+   Date: 05/11/22
    Possible client commands defined in protocol.py
 """
+
+from datetime import datetime
+
+from random import randrange
+
 
 import socket
 import protocol
 
-
+#["TIME", "WHORU", "RAND", "EXIT"]
 def create_server_rsp(cmd):
-    """Based on the command, create a proper response"""
-    return "Server response"
-
-
-def check_cmd(data):
-    """Check if the command is defined in the protocol (e.g NUMBER, HELLO, TIME, EXIT)"""
-    return True
+    if cmd == "TIME":
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        return current_time
+    elif cmd == "WHORU":
+        return "Yehuda"
+    elif cmd == "RAND":
+        A = randrange(10)
+        return str(A)
+    elif cmd == "EXIT":
+        pass
+    else:
+        return "ERROR"
 
 
 def main():
-    # Create TCP/IP socket object
-
-    # Bind server socket to IP and Port
-
-    # Listen to incoming connections
-
-    print("Server is up and running")
+    server_socket = socket.socket()
+    server_socket.bind(("0.0.0.0", protocol.PORT))  # listen over all interfaces 0000 nic or 127001 etc ...
+    server_socket.listen()
+    print("server is running")
     # Create client socket for incoming connection
-
-    print("Client connected")
+    (client_socket, server_socketA) = server_socket.accept()
+    print("connect")
 
     while True:
         # Get message from socket and check if it is according to protocol
         valid_msg, cmd = protocol.get_msg(client_socket)
+
         if valid_msg:
-            # 1. Print received message
-            # 2. Check if the command is valid, use "check_cmd" function
-            # 3. If valid command - create response
-
+            response = create_server_rsp(cmd)
         else:
-            response = "Wrong protocol"
-            client_socket.recv(1024)  # Attempt to empty the socket from possible garbage
-
+            response = cmd
+        # client_socket.recv(1024)  # Attempt to empty the socket from possible garbage
 
         # Send response to the client
-
+        client_socket.send(response.encode())
 
         # If EXIT command, break from loop
+        if cmd == "EXIT":
+            break
 
     print("Closing\n")
-    # Close sockets
+    client_socket.close()
+    server_socket.close()
 
 
 if __name__ == "__main__":
