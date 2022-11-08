@@ -1,6 +1,6 @@
 """EX 2.6 protocol implementation
-   Author:
-   Date:
+   Author:  Yehuda Nevo
+   Date:  8 nov 2022
    Possible client commands:
    NUMBER - server should reply with a random number, 0-99
    HELLO - server should reply with the server's name, anything you want
@@ -9,9 +9,9 @@
 """
 
 LENGTH_FIELD_SIZE = 2
-PORT = 8821
+PORT = 8822
 def check_cmd(data):
-    return data in ["TIME", "WHORU", "RAND", "EXIT"]
+    return data in ["TIME", "HELLO", "RAND", "EXIT"]
 
 
 def create_msg(data):

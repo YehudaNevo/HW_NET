@@ -5,6 +5,7 @@
 """
 
 from datetime import datetime
+from datetime import date
 
 from random import randrange
 
@@ -12,19 +13,21 @@ from random import randrange
 import socket
 import protocol
 
-#["TIME", "WHORU", "RAND", "EXIT"]
+
 def create_server_rsp(cmd):
     if cmd == "TIME":
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
-        return current_time
-    elif cmd == "WHORU":
+        today = date.today()
+        d1 = today.strftime("%d/%m/%Y")
+        return current_time +"  "+  d1
+    elif cmd == "HELLO":
         return "Yehuda"
     elif cmd == "RAND":
-        A = randrange(10)
+        A = randrange(100)
         return str(A)
     elif cmd == "EXIT":
-        pass
+        return "EXIT"
     else:
         return "ERROR"
 
@@ -49,7 +52,7 @@ def main():
         # client_socket.recv(1024)  # Attempt to empty the socket from possible garbage
 
         # Send response to the client
-        client_socket.send(response.encode())
+        client_socket.send(protocol.create_msg(response).encode())
 
         # If EXIT command, break from loop
         if cmd == "EXIT":

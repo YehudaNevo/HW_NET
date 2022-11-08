@@ -14,13 +14,16 @@ def main():
 
     while True:
         user_input = input("Enter command\n")
-        if user_input == "EXIT":
-            my_socket.send(protocol.create_msg(user_input).encode())
+
+
+
+        my_socket.send(protocol.create_msg(user_input).encode())
+
+        size = my_socket.recv(2).decode()
+        data = my_socket.recv(int(size)).decode()
+        if data == "EXIT":
             break
-        else:
-            my_socket.send(protocol.create_msg(user_input).encode())
-            data = my_socket.recv(1024).decode()
-            print(data)
+        print(data)
 
         # 1. Add length field ("HELLO" -> "04HELLO")
         # 2. Send it to the server
