@@ -38,7 +38,7 @@ def main():
     server_socket.listen()
     print("server is running")
     # Create client socket for incoming connection
-    (client_socket, server_socketA) = server_socket.accept()
+    (client_socket, client_address) = server_socket.accept()
     print("connect")
 
     while True:
