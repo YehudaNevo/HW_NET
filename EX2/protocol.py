@@ -8,7 +8,7 @@
    EXIT - server should send acknowledge and quit
 """
 
-LENGTH_FIELD_SIZE = 2
+LENGTH_FIELD_SIZE = 4
 PORT = 8822
 def check_cmd(data):
     return data in ["TIME", "HELLO", "RAND", "EXIT"]
@@ -20,7 +20,7 @@ def create_msg(data):
 
 
 def get_msg(my_socket):
-    size = my_socket.recv(2).decode()
+    size = my_socket.recv(4).decode()
     if size.isnumeric():
         data = my_socket.recv(int(size)).decode()
         if check_cmd(data):

@@ -1,29 +1,23 @@
-
 import socket
-import protocol
+import protocol_A
 
 
 def main():
     my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    my_socket.connect(("127.0.0.1", 55554))
+    my_socket.connect(("127.0.0.1", protocol_A.PORT))
 
     while True:
         user_input = input("Enter command\n")
 
-
-
-        my_socket.send(protocol.create_msg(user_input).encode())
-
-        size = my_socket.recv(2).decode()
-        data = my_socket.recv(int(size)).decode()
-
-        if data == "EXIT":
+        # sand the cmd
+        my_socket.send( (protocol_A.create_msg(user_input)).encode() )
+        if user_input =="EXIT":
             break
+        #  accept the ans
+        data = protocol_A.get_msg(my_socket)
         print(data)
 
-
     print("Closing\n")
-    # Close socket
     my_socket.close()
 
 
