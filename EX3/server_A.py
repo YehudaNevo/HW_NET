@@ -21,6 +21,7 @@ def set_name(dict, port, name, insert=True):
         dict[port] = name
         return True
     else:  # delete name from dict
+        print(port)
         if port in dict.keys():
             del dict[port]
             return True
@@ -40,8 +41,8 @@ def print_client_socket(cl_soc):
 
 def insert_name(soc, data):
     name = data[5:]
-    ans = set_name(client_dict, soc.getsockname()[1], name)
-    if ans:
+    valid = set_name(client_dict, soc.getsockname()[1], name)
+    if valid:
         msg_to_send.append((soc, protocol_A.create_msg("Set your name to " + name)))
     else:
         msg_to_send.append((soc, protocol_A.create_msg("please choose diff name")))
@@ -63,41 +64,38 @@ while True:
         # new client
         if soc is server_socket:
             connection, client_address = soc.accept()
+            print(client_address)
             print("new client", client_address)
             client_sockets.append(connection)
             client_dict[client_address[1]] = 0
             print_dic_for_DEBUG(client_dict)
+
         #  existing client
         else:
-            data = protocol_A.get_msg(soc)
+            ans, data = protocol_A.get_msg(soc)
+            print(data)
+            if data != "":
+                if data[0:4] == "NAME":
+                    insert_name(soc, data)
+                elif data == "GET_NAMES":
+                    print_dict_exp_me(soc)
+                elif data[0:3] == "MSG":
+                    res = send_data(soc, data)
+                elif data == "EXIT":
+                    pass
 
-            if data == "":
+               # msg_to_send.append((soc, protocol_A.create_msg(data)))
+
+            else:  # client leave...
                 print("connection close ")
-                set_name(client_dict, soc.getsockname()[1], False)
+                set_name(client_dict, soc.getpeername()[1], "", False)
                 client_sockets.remove(soc)
                 soc.close()
                 print_client_socket(client_sockets)
-            # option = NAME , GET_NAMES , MSG DEST HELLO , EXIT
-            elif data[0:4] == "NAME":
-                res = insert_name(soc, data)
-                print(res)
-            elif data == "GET_NAMES":
-                print_dict_exp_me(soc)
-            elif data[0] == "MSG":
-                res = send_data(soc, data)
-            elif data == "EXIT":
-                pass
-            elif data != "":
-                print("Please enter valid command")
-            #  client leave
 
-            if data != "":
-                # print(data)
-                msg_to_send.append((soc, protocol_A.create_msg(data)))
 
-        # if there is msgs to sand
-        for m in msg_to_send:
-            sock, dat = m
-            if soc in write_list:
-                soc.send(dat.encode())
-                msg_to_send.remove(m)
+    for m in msg_to_send:
+        sock, dat = m
+        if soc in write_list:
+            soc.send(dat.encode())
+            msg_to_send.remove(m)

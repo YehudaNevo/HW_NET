@@ -1,4 +1,5 @@
 import socket
+import msvcrt
 import protocol_A
 
 
@@ -14,7 +15,7 @@ def main():
         if user_input =="EXIT":
             break
         #  accept the ans
-        data = protocol_A.get_msg(my_socket)
+        ans , data = protocol_A.get_msg(my_socket)
         print(data)
 
     print("Closing\n")
