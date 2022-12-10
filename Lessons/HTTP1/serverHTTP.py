@@ -1,73 +1,94 @@
-# Ex 4.4 - HTTP Server Shell
-# Author: Barak Gonen
-# Purpose: Provide a basis for Ex. 4.4
-# Note: The code is written in a simple way, without classes, log files or other utilities, for educational purpose
-# Usage: Fill the missing functions and constants
 import re
-import sys
-
 import socket
 
 IP = '0.0.0.0'
 PORT = 80
-code = "200"
 SOCKET_TIMEOUT = 0.1
 FIXED_RESPONSE = ""
 dic_of_redirection_urls = {'/yehuda': '/index.html'}
 
 
-def handle_client_request(resource, client_socket):
+#  return the content type to the http response header  , in case of error return empty str ""
+def get_filetype(f):
+    if f == 'txt' or f == 'html':
+        return 'text/html; charset=utf-8'
+    elif f in ['jpg', 'ico', 'gif']:
+        return 'image/jpeg'
+    elif f == 'js':
+        return 'text/javascript; charset=UTF-8'
+    elif f == 'css':
+        return 'text/css'
+    else:
+        print("Debug: file type unrecognized " + f)
+        return ""
 
+
+def return_area(resource, client_socket):
+    numbers = re.findall(r'\d+', resource)
+    result = str(float(numbers[0]) * float(numbers[1]) / 2)
+    response = 'HTTP/1.0 200 OK\r\n\n' + result
+    client_socket.send(response.encode())
+    return
+
+
+#  send the content encoded  to client
+def handle_client_request(resource, client_socket):
+    code = "200"
+    #  for redirection urls
     if resource in dic_of_redirection_urls.keys():
         resource = dic_of_redirection_urls[resource]
-        # code = "302"
+        code = "302"
     if resource == '/':
         resource = '/index.html'
     try:
-        fin = open("webroot" + resource, encoding="utf8", errors='ignore')
-        content = fin.read()
-        fin.close()
-        size = len(content)
+        if re.match("\/calculate-area\?height=(\d+)&width=(\d+)", resource):
+            return_area(resource, client_socket)
+            return
+
         filetype = resource.split('.')[-1]
-        response = 'HTTP/1.0 200 OK\r\n'
-        response += "Content-Type: " + filetype + '\r\n'
+        if filetype not in ['jpg', 'ico', 'gif']:
+            fin = open("webroot" + resource, encoding="utf8", errors='ignore')
+            content = fin.read()
+            fin.close()
+        else:
+            with open('webroot' + resource, 'rb') as file_handle:
+                content = file_handle.read()
+        size = len(content)
+        response = 'HTTP/1.0 ' + code + ' OK\r\n'
+        response += "Content-Type: " + get_filetype(filetype) + '\r\n'
         response += "Content-Length: " + str(size) + '\r\n\n'
+        response = response.encode()
+        if filetype not in ['jpg', 'ico', 'gif']:  # its not byte content yet ...
+            content = content.encode()
         response += content
     except FileNotFoundError:
-        response = 'HTTP/1.0 404 NOT FOUND\n\nFile Not Found'
-    print(response)
-    client_socket.send(response.encode())
+        response = 'HTTP/1.0 404 NOT FOUND\n\nFile Not Found'.encode()
+    client_socket.send(response)
 
 
-# ['GET /<PATH> HTTP/1.1\r',.....]
+#  return if valid or not, and the  resource asked
 def validate_http_request(request):
     headers = request.split("\n")
     h0 = headers[0]
     idx_end_of_resource = h0.find("HTTP") - 1
-    regular_exp_valid_get_h0 = "^GET.*HTTP\/1\.1\r$"
-    valid = re.search(regular_exp_valid_get_h0, h0)
+    regular_exp_valid = "^GET.*HTTP\/1\.1\r$"
+    valid = re.search(regular_exp_valid, h0)
     return valid is not None, h0[4:idx_end_of_resource]
 
 
 def handle_client(client_socket):
-    """ Handles client requests: verifies client's requests are legal HTTP,
-    calls function to handle the requests """
-    print('Client connected')  # TODO  ?
-    client_socket.send(FIXED_RESPONSE.encode())  # TODO ?
+    print('Client connected')
+    client_socket.send(FIXED_RESPONSE.encode())
     while True:
         # Get the client request
         client_request = client_socket.recv(1024).decode()
         # print(request)
         valid_http, resource = validate_http_request(client_request)
         if valid_http:
-            print('Got a valid HTTP request')
             handle_client_request(resource, client_socket)
             break
         else:
-            print('Error: Not a valid HTTP request')
             break
-
-    print('Closing connection')
     client_socket.close()
 
 
