@@ -26,7 +26,7 @@ def get_filetype(f):
 #  function to return area of rectangle to client
 def return_area(resource, client_socket):
     numbers = re.findall(r'\d+', resource)
-    result = str(float(numbers[0]) * float(numbers[1]) / 2)
+    result = str(int(numbers[0]) * int(numbers[1]) // 2)
     response = 'HTTP/1.0 200 OK\r\n\n' + result
     client_socket.send(response.encode())
     return
@@ -72,7 +72,7 @@ def validate_http_request(request):
     headers = request.split("\n")
     h0 = headers[0]
     idx_end_of_resource = h0.find("HTTP") - 1
-    regular_exp_valid = "^GET.*HTTP\/1\.1\r$"
+    regular_exp_valid = "^GET.*HTTP\/1\.[01]\r$"
     valid = re.search(regular_exp_valid, h0)
     return valid is not None, h0[4:idx_end_of_resource]
 
