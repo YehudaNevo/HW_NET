@@ -5,7 +5,7 @@ from scapy.all import DNS, DNSQR, IP, sr1, UDP
 
 MY_IP = '0.0.0.0'
 DNS_SERVER = "8.8.8.8"
-MY_PORT = 8853
+MY_PORT = 8153
 SOCKET_TIMEOUT = 3
 FIXED_RESPONSE = ""
 
