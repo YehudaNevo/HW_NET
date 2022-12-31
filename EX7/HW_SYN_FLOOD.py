@@ -1,8 +1,25 @@
 from scapy.all import *
 
-"""To find suspicious IP addresses, I looked for sources that send a large number of
- packets per second, sources that send packets to a wide range of destination addresses,
-  and especially sources that send a lot of SYN packets but no ACK packets."""
+"""
+To identify suspicious IP addresses, the following criteria were used:
+
+High packet rate:
+Sources that send a large number of packets per second were considered suspicious.
+This could be an indication of a denial of service (DoS) attack or other malicious activity.
+
+Wide range of destination addresses:
+Sources that send packets to a wide range of destination addresses were also
+considered suspicious.
+This could indicate that the source is attempting to scan for vulnerable systems or attempting to spread malware to
+multiple targets.
+
+
+SYN packets without ACK packets:
+Finally, sources that send a large number of SYN packets
+(used to initiate a connection) but no ACK packets (used to acknowledge receipt of the SYN packet)
+were considered particularly suspicious. This could indicate an attempt to establish a large number of connections
+ without completing the handshake process, which could be a sign of an attempted SYN flood attack.
+ """
 
 
 # this method return ips who send more or eq 2 pack per sec
