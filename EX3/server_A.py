@@ -83,6 +83,9 @@ def send_data(soc, data):
 
     lst = data.split(" ")
     to = lst[1]
+    if to not in client_dict.values():
+        msg_to_send.append((soc, protocol_A.create_msg("not valid user name ")))
+        return
     msg = str(name_from) + " sent: "
     for item in lst[2:]:
         msg += " " + item
@@ -111,10 +114,11 @@ while True:
         #  existing client
         else:
             ans, data = protocol_A.get_msg(soc)
+            print(data)
             if data != "":
                 if data[0:4] == "NAME":
                     insert_name(soc, data)
-                elif data[0:9] == "GET NAMES":
+                elif data[0:9] == "GET_NAMES":
                     send_names(soc)
                 elif data[0:3] == "MSG":
                     send_data(soc, data)
