@@ -81,6 +81,11 @@ def send_data(soc, data):
     port_from = soc.getpeername()[1]
     name_from = client_dict[port_from]
 
+    if data == "MSG" or data == "MSG " :
+        msg_to_send.append((soc, protocol_A.create_msg("not valid user name ")))
+        return
+
+
     lst = data.split(" ")
     to = lst[1]
     if to not in client_dict.values():
