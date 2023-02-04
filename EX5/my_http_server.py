@@ -1,11 +1,16 @@
 import re
 import socket
+import urllib.parse
+
+# parameters
 
 IP = '0.0.0.0'
 PORT = 80
-SOCKET_TIMEOUT = 0.1
+SOCKET_TIMEOUT = 2
 FIXED_RESPONSE = ""
 dic_of_redirection_urls = {'/yehuda': '/index.html'}
+valid_math_req = "\/calculate-area\?height=(-?\d+(\.\d+)?)&width=(-?\d+(\.\d+)?)"
+regular_exp_valid_req = "^GET.*HTTP\/1\.[01]\r$"
 
 
 #  return the content type to the http response header  , in case of error return empty str ""
@@ -25,8 +30,11 @@ def get_filetype(f):
 
 #  function to return area of rectangle to client
 def return_area(resource, client_socket):
-    numbers = re.findall(r'\d+', resource)
-    result = str(int(numbers[0]) * int(numbers[1]) // 2)
+    query = urllib.parse.urlsplit(resource).query
+    params = urllib.parse.parse_qs(query)
+    x = float(params['height'][0])
+    y = float(params['width'][0])
+    result = str(x * y / 2)
     response = 'HTTP/1.0 200 OK\r\n\n' + result
     client_socket.send(response.encode())
     return
@@ -42,8 +50,13 @@ def handle_client_request(resource, client_socket):
     if resource == '/':
         resource = '/index.html'
     try:
-        if re.match("\/calculate-area\?height=(\d+)&width=(\d+)", resource):
+        if re.match(valid_math_req, resource):
             return_area(resource, client_socket)
+            return
+        if re.match("\/calculate-area.*", resource):  # not valid
+            result = " Please enter valid input.. "
+            response = 'HTTP/1.0 200 OK\r\n\n' + result
+            client_socket.send(response.encode())
             return
 
         filetype = resource.split('.')[-1]
@@ -72,8 +85,7 @@ def validate_http_request(request):
     headers = request.split("\n")
     h0 = headers[0]
     idx_end_of_resource = h0.find("HTTP") - 1
-    regular_exp_valid = "^GET.*HTTP\/1\.[01]\r$"
-    valid = re.search(regular_exp_valid, h0)
+    valid = re.search(regular_exp_valid_req, h0)
     return valid is not None, h0[4:idx_end_of_resource]
 
 

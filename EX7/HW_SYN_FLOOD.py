@@ -13,7 +13,6 @@ considered suspicious.
 This could indicate that the source is attempting to scan for vulnerable systems or attempting to spread malware to
 multiple targets.
 
-
 SYN packets without ACK packets:
 Finally, sources that send a large number of SYN packets
 (used to initiate a connection) but no ACK packets (used to acknowledge receipt of the SYN packet)
